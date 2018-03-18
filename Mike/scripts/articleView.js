@@ -22,7 +22,8 @@ articleView.populateFilters = () => {
 };
 
 articleView.handleAuthorFilter = () => {
-  $('#author-filter').on('change', function() {
+  $('#author-filter').on('change', function(e) {
+    e.preventDefault();
     if ($(this).val()) {
       $('article').hide();
       $(`article[data-author="${$(this).val()}"]`).fadeIn();
@@ -75,9 +76,9 @@ articleView.setTeasers = () => {
 
 // COMMENT: Where is this function called? Why?
 // This function is called at the bottom of new.html.  It's called there in order to avoid having the code display on both html pages.
-articleView.initNewArticlePage = () => {
+articleView.initNewArticlePage = function () {
   // TODO: Ensure the main .tab-content area is revealed. We might add more tabs later or otherwise edit the tab navigation.
-$('tab-content').show();
+$('.tab-content').show();
 
   // TODO: The new articles we create will be copy/pasted into our source data file.
   // Set up this "export" functionality. We can hide it for now, and show it once we have data to export.
@@ -89,34 +90,37 @@ $('tab-content').show();
   });
 
   // TODO: Add an event handler to update the preview and the export field if any inputs change.
-$('form').on('change', articleView.create);
+$('#new-form').on('change', 'input, textarea', articleView.create);
 
 articleView.create = () => {
   // TODO: Set up a variable to hold the new article we are creating.
   // Clear out the #articles element, so we can put in the updated preview
+  let article;
   $('#articles').empty();
 
   // TODO: Instantiate an article based on what's in the form fields:
-  let article = new Article({
-    title:  $('#article-title').val(), //jQuery method for getting the value of a target field
-    author:  $('#article-author').val(),
-    authorUrl:  $('#article-author-url').val(),
-    category:  $('#article-category').val(),
-    publishedOn:  $('#article-published').val(),
-    body:  $('#article-body').val()
+  article = new Article({
+    title: $('#article-title').val(), 
+    author: $('#article-author').val(),
+    authorUrl: $('#article-author-url').val(),
+    category: $('#article-category').val(),
+    body: $('#article-body').val()
+    publishedOn: $('#article-published:checked').length ? new Date() : null
   });
 
-  // console.log(article);
+  console.log(article);
 
   // TODO: Use our interface to the Handlebars template to put this new article into the DOM:
   $('#articles').append(article.toHtml);
 
   // TODO: Activate the highlighting of any code blocks; look at the documentation for hljs to see how to do this by placing a callback function in the .each():
-  $('pre code').each();
+  $('pre code').each(function(i, block) {
+    hljs.highlighBlock(block);
+  });
 
   // TODO: Show our export field, and export the new article as JSON, so it's ready to copy/paste into blogArticles.js:
   $('#export-field').show();
-  $('article-json').val(JSON.stringify(article))
+  $('article-json').val(JSON.stringify(article) + ',');
 };
 
 // COMMENT: Where is this function called? Why?
@@ -127,5 +131,5 @@ articleView.initIndexPage = () => {
   articleView.handleCategoryFilter();
   articleView.handleAuthorFilter();
   articleView.handleMainNav();
-  articleView.setTeasers();
+  articleView.setTeasers()
 }
